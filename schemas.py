@@ -1,48 +1,32 @@
 """
-Database Schemas
+Database Schemas for AI Voice Agent SaaS
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
-
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
+Each Pydantic model maps to a MongoDB collection with the lowercase class name.
+- Agent -> "agent"
+- Waitlist -> "waitlist"
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
 
-# Example schemas (replace with your own):
-
-class User(BaseModel):
+class Agent(BaseModel):
     """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
+    Voice agents offered in the catalog
+    Collection: agent
     """
-    name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    name: str = Field(..., description="Agent name")
+    persona: str = Field(..., description="Short persona description")
+    use_case: str = Field(..., description="Primary use case e.g., Sales, Support, Booking")
+    languages: List[str] = Field(default_factory=lambda: ["en"], description="Supported languages")
+    starting_price: float = Field(..., ge=0, description="Monthly starting price in USD")
+    demo_url: Optional[str] = Field(None, description="Optional URL to demo recording")
+    avatar: Optional[str] = Field(None, description="Optional avatar or emoji")
 
-class Product(BaseModel):
+class Waitlist(BaseModel):
     """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
+    Waitlist signups from the landing page
+    Collection: waitlist
     """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
-
-# Add your own schemas here:
-# --------------------------------------------------
-
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+    email: EmailStr
+    company: Optional[str] = None
+    interest: Optional[str] = Field(None, description="What they want to build")
